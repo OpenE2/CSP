@@ -1,0 +1,103 @@
+<cardserv-proxy ver="0.9.0">
+
+  <ca-profiles>
+    <default-des-key>01 02 03 04 05 06 07 08 09 10 11 12 13 14</default-des-key>
+    <block-caid-mismatch>false</block-caid-mismatch>
+    <profile name="myprofile" ca-id="1802" network-id="003c" provider-idents="00 00 00,00 22 11, 00 23 11, 00 39 11, 00 38 11" enabled="true" debug="true">
+        <no-validation>true</no-validation>
+        <newcamd listen-port="11112">  </newcamd>
+        <max-cw-wait>4000 ms</max-cw-wait>
+         <session-timeout>240</session-timeout>
+        <session-keepalive>30</session-keepalive>
+        
+        <newcamd-maxmsgsize>480</newcamd-maxmsgsize>
+        <services-file  format="cccam" ca-id="1802" provider="000000 002211 002311 003811 003911">etc/services</services-file>
+    </profile>
+    <profile name="NETBRA" ca-id="1802"  provider-idents="00 00 00, 00 38 11, 00 39 11" network-id="018c"  enabled="true" debug="true" >
+        <newcamd listen-port="2798"/>
+           
+        <load-balance>true</load-balance>
+        <max-cw-wait>8000 ms</max-cw-wait>
+        <session-keepalive>5</session-keepalive>
+        <services-file  format="cccam" ca-id="1802" provider="000000">etc/services</services-file>
+    </profile>
+</ca-profiles>
+  <logging log-ecm="true" log-emm="true" log-zapping="false" hide-ip-addresses="false">
+    <log-file rotate-count="3" rotate-max-size="1024">log/cardserv.log</log-file>
+    <log-level>INFO</log-level>
+    <silent>false</silent>
+    <debug>true</debug>
+  </logging>
+<rmi>
+<allowed-ip-masks>68.65.120.179</allowed-ip-masks>
+<display-name>CSP Server</display-name>
+<status-web>
+<listen-port>80</listen-port>
+<war-file>lib/cs-status.war</war-file>
+<super-users>admin</super-users>
+<ignore-cache-requests>true</ignore-cache-requests>
+</status-web>
+</rmi>   
+<user-manager class="com.bowman.cardserv.SimpleUserManager" log-failures="true" debug="true"> 
+    <auth-config>
+            
+      
+       <!-- PERFIL ADEMIR -->
+      <user name="admin" password="adimin" max-connections="1" admin="true"/>
+
+  <update-interval>1</update-interval>
+      
+      </auth-config>
+  </user-manager>
+  <connection-manager>
+    <default-client-id>00 00</default-client-id>
+    <reconnect-interval>60</reconnect-interval>
+    <default-des-key>01 02 03 04 05 06 07 08 09 10 11 12 13 14</default-des-key>
+    <default-keepalive-interval>55</default-keepalive-interval>
+
+    <service-map>
+      <mapper>         
+        <auto-reset-threshold>20</auto-reset-threshold> 
+      </mapper>
+      <mapper profile="myprofile">
+        <reset-services></reset-services>
+        <block-services></block-services>
+         <dummy-services>1234 0000 131c</dummy-services>  
+      </mapper>
+    </service-map>
+
+    <cws-connectors>
+      <newcamd-connector name="fsnetcs-pago" profile="myprofile" enabled="true" metric="1">
+        <host>bondedo.x</host>
+        <port>123</port>
+         <user>XSA</user>
+        <password>ASX</password>
+        <asynchronous>true</asynchronous>
+        <provider-idents>00 00 00, 00 38 11, 00 39 11</provider-idents>
+      </newcamd-connector>
+    </cws-connectors>
+    
+  </connection-manager>
+
+  <proxy-plugins>
+    <plugin class="com.bowman.cardserv.LoggingPlugin" enabled="false">
+      <plugin-config>
+        <log-dir>log/traffic</log-dir>
+        <log-level>ALL</log-level>
+        <ip-filter>*</ip-filter>
+      </plugin-config>
+    </plugin>
+    
+  </proxy-plugins>
+ 
+  <cache-handler class="com.bowman.cardserv.ClusteredCache">
+    <cache-config>
+      <cw-max-age>4</cw-max-age>
+      <max-cache-wait>70%</max-cache-wait>
+      <local-port>54277</local-port>
+      <sync-period>50</sync-period>
+      <cw-validation checksum="false" zero-counting="false" log-warnings="true"/>
+    </cache-config>
+  </cache-handler>
+
+</cardserv-proxy>​
